@@ -1,5 +1,4 @@
-
-# 🚀 Winternet Meter
+# <h1 align="center">🚀 Winternet Meter</h1></div>
 
 🌐 **Winternet Meter** is a sleek, real-time Windows app that shows your **📶 internet upload/download speed** in a floating, always-on-top window — elegant, customizable, and fast.
 
