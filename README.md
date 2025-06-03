@@ -85,6 +85,6 @@ Let’s make it better together!
 
 ---
 
-Made with ❤️ by [Rakibul Islam](https://github.com/rakibulx33)
+Made with ❤️ by [Rakibul Hasan](https://github.com/rakibulx33)
 
 ---
