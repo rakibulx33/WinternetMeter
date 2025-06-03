@@ -47,6 +47,17 @@ git clone https://github.com/rakibulx33/WinternetMeter.git
 
 ---
 
+## 🖥️ OS Compatibility
+
+🪟 This application is supported on:
+
+- Windows 11 ✅  
+- Windows 10 ✅  
+- Windows 8/8.1 ✅  
+- Windows 7 ✅
+
+---
+
 ## 🧑‍💻 How It Works
 
 - The app uses **performance counters** to monitor real-time network I/O.
