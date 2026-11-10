@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Everything that isn't drawing pixels: speed sampling, adapter choice,
+       formatting, settings and the tray/right-click menu. No UI, no Windows APIs,
+       so it builds and is tested on both Windows and Linux. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>WinternetMeter.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WinternetMeter.Core.Tests" />
+  </ItemGroup>
+
+</Project>
