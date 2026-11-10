@@ -78,6 +78,27 @@ jobs:
           New-Item -ItemType Directory -Force dist | Out-Null
           Copy-Item "publish/${{ matrix.rid }}/WinternetMeter.exe" "dist/WinternetMeter-$env:VERSION-${{ matrix.rid }}-portable.exe"
           Copy-Item "installer/Output/*.exe" dist/
+      - name: Test installer (install → run → uninstall)
+        if: matrix.rid == 'win-x64'
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem dist -Filter "*-setup.exe" | Select-Object -First 1
+          Start-Process $setup.FullName -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/TASKS=startup" -Wait
+          $exe = Join-Path $env:LOCALAPPDATA "Programs\WinternetMeter\WinternetMeter.exe"
+          if (-not (Test-Path $exe)) { Write-Error "Not installed at $exe"; exit 1 }
+          $run = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run")."Winternet Meter"
+          Write-Host "Startup entry: $run"
+          if ($run -ne "`"$exe`"") { Write-Error "Startup entry wrong"; exit 1 }
+          $p = Start-Process $exe -PassThru
+          Start-Sleep -Seconds 6
+          if ($p.HasExited) { Write-Error "Installed app exited early"; exit 1 }
+          $uninstaller = Join-Path $env:LOCALAPPDATA "Programs\WinternetMeter\unins000.exe"
+          Start-Process $uninstaller -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART" -Wait
+          Start-Sleep -Seconds 3
+          if (Test-Path $exe) { Write-Error "Uninstall left the exe behind"; exit 1 }
+          $left = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -ErrorAction SilentlyContinue)."Winternet Meter"
+          if ($left) { Write-Error "Uninstall left the startup entry"; exit 1 }
+          Get-ChildItem dist | Format-Table Name, @{n="MB";e={[math]::Round($_.Length/1MB,1)}}
       - uses: actions/upload-artifact@v4
         with:
           name: windows-${{ matrix.rid }}
@@ -136,6 +157,27 @@ jobs:
           ARCH=${{ matrix.appimage_arch }} APPIMAGE_EXTRACT_AND_RUN=1 ./appimagetool $app "dist/WinternetMeter-${VERSION}-${{ matrix.appimage_arch }}.AppImage"
       - name: Tarball
         run: tar -C publish/${{ matrix.rid }} -czf "dist/winternetmeter-${VERSION}-${{ matrix.rid }}.tar.gz" winternetmeter
+      - name: Test .deb and AppImage (install → run)
+        if: matrix.rid == 'linux-x64'
+        run: |
+          set -e
+          sudo apt-get update -q && sudo apt-get install -y -q xvfb
+          dpkg-deb -c dist/*.deb
+          sudo apt-get install -y -q ./dist/winternetmeter_*_amd64.deb
+          test -x /usr/bin/winternetmeter
+          test -f /usr/share/applications/winternetmeter.desktop
+          desktop-file-validate /usr/share/applications/winternetmeter.desktop || true
+          set +e
+          timeout 8 xvfb-run -a winternetmeter; code=$?
+          set -e
+          echo ".deb run exit code: $code"; test "$code" -eq 124
+          chmod +x dist/*.AppImage
+          set +e
+          APPIMAGE_EXTRACT_AND_RUN=1 timeout 8 xvfb-run -a dist/*.AppImage; code=$?
+          set -e
+          echo "AppImage run exit code: $code"; test "$code" -eq 124
+          sudo apt-get remove -y -q winternetmeter
+          ls -la dist
       - uses: actions/upload-artifact@v4
         with:
           name: linux-${{ matrix.rid }}
