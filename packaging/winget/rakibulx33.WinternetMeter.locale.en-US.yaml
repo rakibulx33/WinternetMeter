@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+PackageIdentifier: rakibulx33.WinternetMeter
+PackageVersion: VERSION
+PackageLocale: en-US
+Publisher: Rakibul Hasan
+PublisherUrl: https://github.com/rakibulx33
+PublisherSupportUrl: https://github.com/rakibulx33/WinternetMeter/issues
+PackageName: Winternet Meter
+PackageUrl: https://github.com/rakibulx33/WinternetMeter
+License: MIT
+LicenseUrl: https://github.com/rakibulx33/WinternetMeter/blob/main/LICENSE
+ShortDescription: Real-time upload/download speed in a small always-on-top widget.
+Description: >-
+  Shows your current network upload and download speed in a tiny floating widget
+  (on the taskbar or anywhere you drag it) and the tray icon tooltip. Picks the
+  adapter your internet traffic actually uses, ignoring WSL, Hyper-V and VPN adapters.
+Tags:
+  - network
+  - speed
+  - bandwidth
+  - meter
+  - monitor
+  - taskbar
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

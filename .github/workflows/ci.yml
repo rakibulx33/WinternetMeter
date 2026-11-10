@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  linux:
+    name: Core tests + Linux app (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Test Core
+        run: dotnet test tests/WinternetMeter.Core.Tests -c Release --logger "console;verbosity=normal"
+      - name: Build Linux app
+        run: dotnet build src/WinternetMeter.Linux -c Release
+      - name: Smoke-run Linux app under a virtual display
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q xvfb
+          dotnet publish src/WinternetMeter.Linux -c Release -r linux-x64 --self-contained -o publish/linux
+          # Must start and stay up for 8 s without crashing (timeout's exit code 124 = still running = good).
+          set +e
+          timeout 8 xvfb-run -a ./publish/linux/winternetmeter
+          code=$?
+          set -e
+          echo "exit code: $code"
+          test "$code" -eq 124
+      - name: Syntax-check GNOME extension
+        run: |
+          cp gnome-extension/winternetmeter@rakibulx33/extension.js /tmp/extension.mjs
+          node --check /tmp/extension.mjs
+          python3 -m json.tool gnome-extension/winternetmeter@rakibulx33/metadata.json > /dev/null
+
+  windows:
+    name: Core tests + Windows app (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Test Core
+        run: dotnet test tests/WinternetMeter.Core.Tests -c Release --logger "console;verbosity=normal"
+      - name: Build Windows app
+        run: dotnet build src/WinternetMeter.Windows -c Release
+      - name: Smoke-run Windows app
+        shell: pwsh
+        run: |
+          dotnet publish src/WinternetMeter.Windows -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o publish/win
+          $p = Start-Process -FilePath publish/win/WinternetMeter.exe -PassThru
+          Start-Sleep -Seconds 8
+          if ($p.HasExited) { Write-Error "App exited early with code $($p.ExitCode)"; exit 1 }
+          # Second launch must exit immediately (single instance).
+          $second = Start-Process -FilePath publish/win/WinternetMeter.exe -PassThru
+          if (-not $second.WaitForExit(5000)) { Write-Error "Second instance did not exit"; exit 1 }
+          Stop-Process -Id $p.Id -Force
+          $settings = Join-Path $env:APPDATA "WinternetMeter\settings.json"
+          Write-Host "settings.json exists: $(Test-Path $settings)"

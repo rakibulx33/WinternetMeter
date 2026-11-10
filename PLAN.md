@@ -1,5 +1,15 @@
 # WinternetMeter — Windows 11 Comfort + Linux (Ubuntu) Port Plan
 
+> **Status (v2.0.0): implemented** — Phases 1–3, plus Phase 4's dark tray menu, GNOME extension and winget template.
+> Not done: code signing (paid), per-app usage (separate project), purging `demo2.gif` from git history (needs your OK — rewrites history).
+>
+> Deviations from the plan, and why:
+> - One release (v2.0.0) instead of v1.1 / v1.2 / v2.0 — all phases landed together.
+> - Default look stays **transparent text on the taskbar** (what v1 users run); the rounded box is an option.
+> - Saved position is validated against the **whole screen**, not the working area, because the taskbar is a valid place for it.
+> - Widget uses a per-pixel-alpha layered window instead of a Region + Opacity: smooth edges and no black halo.
+> - Menu model lives in Core (`MeterMenu`) and both apps render it, so menus can't drift apart.
+
 > Build plan for Claude Code. Work phase by phase; each phase ends in a working, releasable app.
 > Commit after every numbered task. Don't start Phase 3 until Phase 2's tests pass.
 

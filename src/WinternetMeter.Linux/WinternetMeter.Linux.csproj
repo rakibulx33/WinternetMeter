@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>winternetmeter</AssemblyName>
+    <RootNamespace>WinternetMeter.Linux</RootNamespace>
+    <RuntimeIdentifiers>linux-x64;linux-arm64</RuntimeIdentifiers>
+    <!-- No ICU dependency: one less library to install on minimal systems. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 11.3 = current long-supported Avalonia line. Linux runs it on X11 (XWayland under GNOME Wayland). -->
+    <PackageReference Include="Avalonia" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WinternetMeter.Core\WinternetMeter.Core.csproj" />
+  </ItemGroup>
+
+</Project>

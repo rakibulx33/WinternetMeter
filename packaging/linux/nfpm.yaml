@@ -1,0 +1,35 @@
+# .deb package definition for nfpm (https://nfpm.goreleaser.com).
+# The release workflow fills ${VERSION}, ${ARCH} and ${BINARY} with envsubst.
+name: winternetmeter
+arch: ${ARCH}
+platform: linux
+version: ${VERSION}
+section: net
+priority: optional
+maintainer: Rakibul Hasan <rakibulx33@users.noreply.github.com>
+description: |
+  Real-time network upload/download speed meter.
+  A small always-on-top widget plus a tray icon, with automatic
+  adapter selection (ignores Docker/VPN/VM interfaces).
+homepage: https://github.com/rakibulx33/WinternetMeter
+license: MIT
+
+# Avalonia on X11 needs these; everything else is bundled in the binary.
+depends:
+  - libx11-6
+  - libice6
+  - libsm6
+  - libfontconfig1
+
+contents:
+  - src: ${BINARY}
+    dst: /opt/winternetmeter/winternetmeter
+    file_info:
+      mode: 0755
+  - src: /opt/winternetmeter/winternetmeter
+    dst: /usr/bin/winternetmeter
+    type: symlink
+  - src: packaging/linux/winternetmeter.desktop
+    dst: /usr/share/applications/winternetmeter.desktop
+  - src: packaging/linux/winternetmeter.png
+    dst: /usr/share/icons/hicolor/256x256/apps/winternetmeter.png

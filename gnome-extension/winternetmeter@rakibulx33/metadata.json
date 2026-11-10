@@ -1,0 +1,8 @@
+{
+  "uuid": "winternetmeter@rakibulx33",
+  "name": "Winternet Meter",
+  "description": "Real-time network download/upload speed in the top bar. Measures the interface(s) your internet traffic actually uses and ignores Docker, VPN and VM interfaces. Click to switch between MB/s and Mbps.",
+  "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "url": "https://github.com/rakibulx33/WinternetMeter",
+  "version-name": "2.0.0"
+}

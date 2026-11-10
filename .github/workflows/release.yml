@@ -1,0 +1,165 @@
+name: Release
+
+# Push a tag like v2.0.0 → builds everything and publishes a GitHub Release.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build (no release is published from a manual run)"
+        required: true
+        default: "0.0.0-dev"
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      value: ${{ steps.v.outputs.value }}
+    steps:
+      - id: v
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then v="${GITHUB_REF_NAME#v}"; else v="${{ inputs.version }}"; fi
+          echo "value=$v" >> "$GITHUB_OUTPUT"
+
+  windows:
+    needs: version
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - rid: win-x64
+            inno_arch: x64compatible
+          - rid: win-arm64
+            inno_arch: arm64
+    env:
+      VERSION: ${{ needs.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Publish single-file exe
+        run: >
+          dotnet publish src/WinternetMeter.Windows -c Release -r ${{ matrix.rid }} --self-contained
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true -p:DebugType=none
+          -p:Version=${{ env.VERSION }} -o publish/${{ matrix.rid }}
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build installer
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" `
+            "/DAppVersion=$env:VERSION" `
+            "/DArch=${{ matrix.rid }}" `
+            "/DArchAllowed=${{ matrix.inno_arch }}" `
+            "/DSourceExe=..\publish\${{ matrix.rid }}\WinternetMeter.exe" `
+            installer\winternetmeter.iss
+      - name: Collect
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item "publish/${{ matrix.rid }}/WinternetMeter.exe" "dist/WinternetMeter-$env:VERSION-${{ matrix.rid }}-portable.exe"
+          Copy-Item "installer/Output/*.exe" dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.rid }}
+          path: dist/*
+
+  linux:
+    needs: version
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - rid: linux-x64
+            deb_arch: amd64
+            appimage_arch: x86_64
+          - rid: linux-arm64
+            deb_arch: arm64
+            appimage_arch: ""
+    env:
+      VERSION: ${{ needs.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Publish single-file binary
+        run: >
+          dotnet publish src/WinternetMeter.Linux -c Release -r ${{ matrix.rid }} --self-contained
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true -p:DebugType=none
+          -p:Version=${{ env.VERSION }} -o publish/${{ matrix.rid }}
+      - name: Build .deb
+        env:
+          ARCH: ${{ matrix.deb_arch }}
+          BINARY: publish/${{ matrix.rid }}/winternetmeter
+        run: |
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+          mkdir -p dist
+          envsubst < packaging/linux/nfpm.yaml > nfpm.generated.yaml
+          "$(go env GOPATH)/bin/nfpm" package --config nfpm.generated.yaml --packager deb --target dist/
+      - name: Build AppImage
+        if: matrix.appimage_arch != ''
+        run: |
+          set -e
+          app=AppDir
+          mkdir -p $app/usr/bin
+          cp publish/${{ matrix.rid }}/winternetmeter $app/usr/bin/
+          cp packaging/linux/winternetmeter.desktop $app/
+          cp packaging/linux/winternetmeter.png $app/
+          cp packaging/linux/AppRun $app/AppRun
+          chmod +x $app/AppRun $app/usr/bin/winternetmeter
+          curl -fsSL -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.appimage_arch }}.AppImage
+          chmod +x appimagetool
+          ARCH=${{ matrix.appimage_arch }} APPIMAGE_EXTRACT_AND_RUN=1 ./appimagetool $app "dist/WinternetMeter-${VERSION}-${{ matrix.appimage_arch }}.AppImage"
+      - name: Tarball
+        run: tar -C publish/${{ matrix.rid }} -czf "dist/winternetmeter-${VERSION}-${{ matrix.rid }}.tar.gz" winternetmeter
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.rid }}
+          path: dist/*
+
+  gnome-extension:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip extension
+        run: |
+          mkdir -p dist
+          cd gnome-extension/winternetmeter@rakibulx33
+          zip -r ../../dist/winternetmeter@rakibulx33.shell-extension.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gnome-extension
+          path: dist/*
+
+  publish:
+    if: github.event_name == 'push'
+    needs: [version, windows, linux, gnome-extension]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: cd dist && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Winternet Meter ${{ needs.version.outputs.value }}
+          generate_release_notes: true
+          files: dist/*

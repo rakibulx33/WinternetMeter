@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Winternet Meter
+GenericName=Network Speed Meter
+Comment=Real-time network upload/download speed
+Exec=winternetmeter
+Icon=winternetmeter
+Terminal=false
+Categories=Network;Monitor;Utility;
+Keywords=network;speed;bandwidth;internet;upload;download;
+StartupWMClass=winternetmeter
+StartupNotify=false

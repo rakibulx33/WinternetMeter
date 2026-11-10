@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinternetMeter.Core.Tests", "tests\WinternetMeter.Core.Tests\WinternetMeter.Core.Tests.csproj", "{0777736C-BD2D-45D7-A265-03EAF0A4BBA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinternetMeter.Linux", "src\WinternetMeter.Linux\WinternetMeter.Linux.csproj", "{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,18 @@ Global
 		{0777736C-BD2D-45D7-A265-03EAF0A4BBA4}.Release|x64.Build.0 = Release|Any CPU
 		{0777736C-BD2D-45D7-A265-03EAF0A4BBA4}.Release|x86.ActiveCfg = Release|Any CPU
 		{0777736C-BD2D-45D7-A265-03EAF0A4BBA4}.Release|x86.Build.0 = Release|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Debug|x64.Build.0 = Debug|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Debug|x86.Build.0 = Debug|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Release|x64.ActiveCfg = Release|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Release|x64.Build.0 = Release|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Release|x86.ActiveCfg = Release|Any CPU
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,5 +81,6 @@ Global
 		{6B34F0D6-3712-4BF0-A78D-1C5CD2178F74} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{8B5598F3-34C9-47B6-828E-E506E66B7187} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{0777736C-BD2D-45D7-A265-03EAF0A4BBA4} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{4599B105-FE85-45CF-8E1C-C9CA1DEA87E2} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

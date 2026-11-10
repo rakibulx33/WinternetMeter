@@ -71,4 +71,21 @@ public class AdapterResolverTests
     [InlineData("usb0")]
     public void Linux_physical_interfaces_are_not_virtual(string name) =>
         Assert.False(AdapterResolver.IsVirtual(new AdapterInfo(name, name, name, AdapterKind.Ethernet, true, true)));
+
+    [Theory]
+    [InlineData("Local Area Connection", "Realtek PCIe GbE Family Controller")]
+    [InlineData("Ethernet 2", "Intel(R) Ethernet Connection I219-V")]
+    [InlineData("Wi-Fi", "MediaTek Wi-Fi 6 MT7921 Wireless LAN Card")]
+    [InlineData("Cellular", "Qualcomm Snapdragon X55 5G")]
+    public void Windows_physical_adapters_are_not_virtual(string name, string description) =>
+        Assert.False(AdapterResolver.IsVirtual(new AdapterInfo("{x}", name, description, AdapterKind.Ethernet, true, true)));
+
+    [Theory]
+    [InlineData("vEthernet (Default Switch)", "Hyper-V Virtual Ethernet Adapter")]
+    [InlineData("Ethernet 3", "VirtualBox Host-Only Ethernet Adapter")]
+    [InlineData("OpenVPN Connect", "TAP-Windows Adapter V9")]
+    [InlineData("Tailscale", "Tailscale Tunnel")]
+    [InlineData("Local Area Connection* 2", "Microsoft Wi-Fi Direct Virtual Adapter #2")]
+    public void Windows_virtual_adapters_are_virtual(string name, string description) =>
+        Assert.True(AdapterResolver.IsVirtual(new AdapterInfo("{x}", name, description, AdapterKind.Ethernet, true, false)));
 }

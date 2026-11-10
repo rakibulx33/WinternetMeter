@@ -29,7 +29,9 @@ public static partial class AdapterResolver
     // on the physical adapter, so including both would double-count.
     [GeneratedRegex(
         @"vEthernet|Hyper-V|\bWSL\b|VirtualBox|VMware|Virtual Adapter|Virtual Ethernet|TAP-|Wintun|WireGuard|Npcap|Loopback|Teredo|isatap|6to4|Wi-Fi Direct|Bluetooth|Tailscale|ZeroTier" +
-        @"|^(lo|docker\d*|br-|veth|virbr|vboxnet|vmnet|tun\d|tap\d|wg\d|zt|tailscale|cni|flannel|cali|lxcbr|lxdbr|podman|vnet)",
+        // Linux names are lowercase: match them case-sensitively so a Windows adapter
+        // called "Local Area Connection" isn't mistaken for "lo".
+        @"|(?-i:^(lo$|docker\d*|br-|veth|virbr|vboxnet|vmnet|tun\d|tap\d|wg\d|zt|tailscale|cni|flannel|cali|lxcbr|lxdbr|podman|vnet|ifb|dummy|sit\d))",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex VirtualPattern();
 
