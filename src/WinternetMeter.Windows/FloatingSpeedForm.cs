@@ -129,11 +129,11 @@ internal sealed class FloatingSpeedForm : Form
         base.Dispose(disposing);
     }
 
-    private float Scale => DeviceDpi / 96f;
+    private float DpiScale => DeviceDpi / 96f;
 
     private void RebuildLayout()
     {
-        float scale = Scale;
+        float scale = DpiScale;
         _font?.Dispose();
         _font = CreateWidgetFont(_settings, scale);
 
@@ -260,7 +260,7 @@ internal sealed class FloatingSpeedForm : Form
         {
             // A soft dark outline keeps transparent text readable on light wallpapers/taskbars.
             using var shadowBrush = new SolidBrush(Color.FromArgb(150, 0, 0, 0));
-            float o = Math.Max(1f, Scale);
+            float o = Math.Max(1f, DpiScale);
             g.DrawString(arrow, _font!, shadowBrush, Offset(arrowRect, o), format);
             g.DrawString(text, _font!, shadowBrush, Offset(valueRect, o), valueFormat);
         }

@@ -1,9 +1,16 @@
 name: Release
 
 # Push a tag like v2.0.0 → builds everything and publishes a GitHub Release.
+# Changes to packaging files also run a dry build (artifacts only, no release).
 on:
   push:
     tags: ["v*"]
+    branches: ["**"]
+    paths:
+      - "installer/**"
+      - "packaging/**"
+      - "gnome-extension/**"
+      - ".github/workflows/release.yml"
   workflow_dispatch:
     inputs:
       version:
@@ -26,7 +33,9 @@ jobs:
     steps:
       - id: v
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then v="${GITHUB_REF_NAME#v}"; else v="${{ inputs.version }}"; fi
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then v="${GITHUB_REF_NAME#v}";
+          elif [ -n "${{ inputs.version }}" ]; then v="${{ inputs.version }}";
+          else v="0.0.0-ci.${{ github.run_number }}"; fi
           echo "value=$v" >> "$GITHUB_OUTPUT"
 
   windows:
@@ -148,7 +157,7 @@ jobs:
           path: dist/*
 
   publish:
-    if: github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/v')
     needs: [version, windows, linux, gnome-extension]
     runs-on: ubuntu-latest
     steps:
