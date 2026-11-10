@@ -40,10 +40,8 @@ UninstallDisplayName=Winternet Meter
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
-; Matches the app's single-instance mutex: setup asks to close a running meter before updating.
-AppMutex=WinternetMeter.SingleInstance
-CloseApplications=yes
-RestartApplications=no
+; A running meter is closed by the [Code] section below (so silent installs/uninstalls never stall).
+CloseApplications=no
 
 [Tasks]
 Name: "startup"; Description: "Start Winternet Meter when I sign in"; GroupDescription: "Options:"
@@ -64,8 +62,30 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 Filename: "{app}\WinternetMeter.exe"; Description: "Launch Winternet Meter now"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
-Filename: "{sys}\taskkill.exe"; Parameters: "/IM WinternetMeter.exe /F"; Flags: runhidden; RunOnceId: "StopMeter"
 ; Remove the startup entry even if it was turned on from the app's menu (not by this installer).
 Filename: "{sys}\reg.exe"; Parameters: "delete ""HKCU\Software\Microsoft\Windows\CurrentVersion\Run"" /v ""Winternet Meter"" /f"; Flags: runhidden; RunOnceId: "RemoveStartup"
 
 ; Settings in %AppData%\WinternetMeter are kept on uninstall so a reinstall remembers them.
+
+[Code]
+// The meter has no visible main window, so Windows' "close running apps" can't ask it to quit.
+// Stop it directly before files are replaced (update) or removed (uninstall).
+procedure StopMeter();
+var
+  ResultCode: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/IM WinternetMeter.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Sleep(500);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  StopMeter();
+  Result := '';
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  StopMeter();
+  Result := True;
+end;

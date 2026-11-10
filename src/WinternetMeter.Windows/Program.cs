@@ -4,7 +4,6 @@ namespace WinternetMeter.Windows;
 
 internal static class Program
 {
-    /// <summary>Same name as the installer's AppMutex, so setup can tell the app is running.</summary>
     internal const string MutexName = "WinternetMeter.SingleInstance";
 
     [STAThread]
