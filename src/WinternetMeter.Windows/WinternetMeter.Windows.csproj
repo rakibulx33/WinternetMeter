@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
-    <!-- Windows 10 1809+ / Windows 11, same floor as .NET 10 itself. -->
-    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <!-- Minimum OS (Windows 10 1809+) is enforced by .NET 10 itself and the installer's MinVersion.
+         A versioned TFM (net10.0-windows10.0.x) would add ~25 MB of unused WinRT projections. -->
     <UseWindowsForms>true</UseWindowsForms>
     <!-- Sharp text on mixed-DPI setups (laptop at 150% + monitor at 100%). -->
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
